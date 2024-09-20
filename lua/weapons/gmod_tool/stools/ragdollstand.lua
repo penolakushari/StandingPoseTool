@@ -22,11 +22,16 @@ function TOOL:LeftClick(tr)
 			return true
 		end
 
-
+		local hpos = tr.HitPos
 		local ent = ents.Create("prop_dynamic")
 		ent:SetModel(rag:GetModel())
-		ent:SetPos(tr.HitPos)
-		local angle = (tr.HitPos - self:GetOwner():GetPos()):Angle()
+		ent:SetPos(hpos)
+		local min = ent:WorldSpaceAABB()
+		local diff = hpos.z - min.z
+		if diff > 100 then
+			ent:SetPos(hpos + Vector(0, 0, diff))
+		end
+		local angle = (hpos - self:GetOwner():GetPos()):Angle()
 		ent:SetAngles(Angle(0, angle.y - 180, 0))
 		ent:Spawn()
 

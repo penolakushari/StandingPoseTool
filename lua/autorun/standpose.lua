@@ -84,21 +84,34 @@ propt.Receive = function( self, length, player )
 	if ( !IsValid( rag ) ) then return end
 	if ( !IsValid( player ) ) then return end
 	if ( rag:GetClass() != "prop_ragdoll" ) then return end
-	
-	local adjust = Vector(0, 0, 3000)
-	if not rag:IsInWorld() then adjust = Vector(0, 0, -10) end
 
-	local tr = util.TraceLine({start = rag:GetPos(), endpos = rag:GetPos() - adjust, filter = rag})
+	local ragpos = rag:GetPos()
+	local adjust = vector_origin
+	if not rag:IsInWorld() then
+		local _, max = rag:WorldSpaceAABB()
+		ragpos.z = max.z
+	end
 
+	local tr = util.TraceLine({start = ragpos + adjust, endpos = ragpos - Vector(0, 0, 3000), filter = rag})
+	if not util.IsInWorld(tr.HitPos) then
+		tr = util.TraceLine({start = player:EyePos(), endpos = ragpos, filter = {rag, player}})
+	end
+
+	local hpos = tr.HitPos
 	local ent = ents.Create("prop_dynamic")
 	ent:SetModel(rag:GetModel())
-	ent:SetPos(tr.HitPos)
-	local angle = (tr.HitPos - player:GetPos()):Angle()
+	ent:SetPos(hpos)
+	local min = ent:WorldSpaceAABB()
+	local diff = hpos.z - min.z
+	if diff > 100 then
+		ent:SetPos(hpos + Vector(0, 0, diff))
+	end
+	local angle = (hpos - player:GetPos()):Angle()
 	ent:SetAngles(Angle(0, angle.y - 180, 0))
 	ent:Spawn()
 
 	if CLIENT then return true end
-	local PhysObjects = rag:GetPhysicsObjectCount()-1
+	local PhysObjects = rag:GetPhysicsObjectCount() - 1
 	
 	if game.SinglePlayer() then
 		timer.Simple(0.1, function()
@@ -109,7 +122,7 @@ propt.Receive = function( self, length, player )
 			net.Send(player)
 		end)
 	else -- if we're in multiplayer, we revert back to the old way stand pose worked, otherwise stuff will get weird
-		for i=0, PhysObjects do
+		for i = 0, PhysObjects do
 			local phys = rag:GetPhysicsObjectNum(i)
 			local b = rag:TranslatePhysBoneToBone(i)
 			local pos, ang = ent:GetBonePosition(b)
