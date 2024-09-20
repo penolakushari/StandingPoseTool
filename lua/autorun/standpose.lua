@@ -86,13 +86,12 @@ propt.Receive = function( self, length, player )
 	if ( rag:GetClass() != "prop_ragdoll" ) then return end
 
 	local ragpos = rag:GetPos()
-	local adjust = vector_origin
 	if not rag:IsInWorld() then
 		local _, max = rag:WorldSpaceAABB()
 		ragpos.z = max.z
 	end
 
-	local tr = util.TraceLine({start = ragpos + adjust, endpos = ragpos - Vector(0, 0, 3000), filter = rag})
+	local tr = util.TraceLine({start = ragpos, endpos = ragpos - Vector(0, 0, 3000), filter = rag})
 	if not util.IsInWorld(tr.HitPos) then
 		tr = util.TraceLine({start = player:EyePos(), endpos = ragpos, filter = {rag, player}})
 	end
