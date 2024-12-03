@@ -100,10 +100,14 @@ propt.Receive = function( self, length, player )
 	local ent = ents.Create("prop_dynamic")
 	ent:SetModel(rag:GetModel())
 	ent:SetPos(hpos)
-	local min = ent:WorldSpaceAABB()
+	local min, max = ent:WorldSpaceAABB()
 	local diff = hpos.z - min.z
-	if diff > 100 then
-		ent:SetPos(hpos + Vector(0, 0, diff))
+	local low = Vector(hpos.x, hpos.y, min.z)
+	if not util.IsInWorld(low) then
+		low.z = low.z + (max.z - min.z) * 0.1
+		if not util.IsInWorld(low) then
+			ent:SetPos(hpos + Vector(0, 0, diff))
+		end
 	end
 	local angle = (hpos - player:GetPos()):Angle()
 	ent:SetAngles(Angle(0, angle.y - 180, 0))
