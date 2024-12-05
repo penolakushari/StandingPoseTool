@@ -100,14 +100,11 @@ propt.Receive = function( self, length, player )
 	local ent = ents.Create("prop_dynamic")
 	ent:SetModel(rag:GetModel())
 	ent:SetPos(hpos)
-	local min, max = ent:WorldSpaceAABB()
+	local min = ent:WorldSpaceAABB()
 	local diff = hpos.z - min.z
-	local low = Vector(hpos.x, hpos.y, min.z)
-	if not util.IsInWorld(low) then
-		low.z = low.z + (max.z - min.z) * 0.1
-		if not util.IsInWorld(low) then
-			ent:SetPos(hpos + Vector(0, 0, diff))
-		end
+	local tool = player:GetTool("ragdollstand")
+	if tool and tool:GetClientNumber("use_bbox") == 1 then
+		ent:SetPos(hpos + Vector(0, 0, diff))
 	end
 	local angle = (hpos - player:GetPos()):Angle()
 	ent:SetAngles(Angle(0, angle.y - 180, 0))

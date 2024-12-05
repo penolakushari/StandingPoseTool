@@ -4,6 +4,8 @@ TOOL.Name			= "Stand Pose"
 TOOL.Command		= nil
 TOOL.ConfigName		= nil
 
+TOOL.ClientConVar["use_bbox"] = 0
+
 function TOOL:LeftClick(tr)
 	if self:GetStage() == 0 then
 
@@ -26,14 +28,10 @@ function TOOL:LeftClick(tr)
 		local ent = ents.Create("prop_dynamic")
 		ent:SetModel(rag:GetModel())
 		ent:SetPos(hpos)
-		local min, max = ent:WorldSpaceAABB()
+		local min = ent:WorldSpaceAABB()
 		local diff = hpos.z - min.z
-		local low = Vector(hpos.x, hpos.y, min.z)
-		if not util.IsInWorld(low) then
-			low.z = low.z + (max.z - min.z) * 0.1
-			if not util.IsInWorld(low) then
-				ent:SetPos(hpos + Vector(0, 0, diff))
-			end
+		if self:GetClientNumber("use_bbox") == 1 then
+			ent:SetPos(hpos + Vector(0, 0, diff))
 		end
 		local angle = (hpos - self:GetOwner():GetPos()):Angle()
 		ent:SetAngles(Angle(0, angle.y - 180, 0))
@@ -88,5 +86,13 @@ language.Add("tool.ragdollstand.name", "Stand Pose")
 language.Add("tool.ragdollstand.desc", "Position ragdolls in a standing pose.")
 language.Add("tool.ragdollstand.0", "Left Click to select a ragdoll.")
 language.Add("tool.ragdollstand.1", "Now click on a position where you want the ragdoll to stand or Right Click to cancel.")
+
+function TOOL.BuildCPanel(CPanel)
+	local CB = vgui.Create("DCheckBoxLabel", CPanel)
+	CB:SetText("Use Bounding Box")
+	CB:SetConVar("ragdollstand_use_bbox")
+	CB:SetDark(true)
+	CPanel:AddItem(CB)
+end
 
 end
