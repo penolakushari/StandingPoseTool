@@ -65,9 +65,10 @@ local propt = {}
 propt.MenuLabel = "Stand Pose"
 propt.Order = 5000
 
-propt.Filter = function( self, ent )
+propt.Filter = function( self, ent, ply )
 	if ( !IsValid( ent ) ) then return false end
 	if ( ent:GetClass() != "prop_ragdoll" ) then return false end
+	if ( !gamemode.Call( "CanProperty", ply, "standpose", ent ) ) then return false end
 	return true 
 end
 
