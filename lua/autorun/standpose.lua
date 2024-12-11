@@ -85,6 +85,8 @@ propt.Receive = function( self, length, player )
 	if ( !IsValid( rag ) ) then return end
 	if ( !IsValid( player ) ) then return end
 	if ( rag:GetClass() != "prop_ragdoll" ) then return end
+	if ( !properties.CanBeTargeted( rag, player ) ) then return end
+	if ( !self:Filter( rag, player ) ) then return end
 
 	local ragpos = rag:GetPos()
 	if not rag:IsInWorld() then
