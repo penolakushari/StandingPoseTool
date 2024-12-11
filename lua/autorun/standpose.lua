@@ -65,9 +65,10 @@ local propt = {}
 propt.MenuLabel = "Stand Pose"
 propt.Order = 5000
 
-propt.Filter = function( self, ent )
+propt.Filter = function( self, ent, ply )
 	if ( !IsValid( ent ) ) then return false end
 	if ( ent:GetClass() != "prop_ragdoll" ) then return false end
+	if ( !gamemode.Call( "CanProperty", ply, "standpose", ent ) ) then return false end
 	return true 
 end
 
@@ -84,6 +85,8 @@ propt.Receive = function( self, length, player )
 	if ( !IsValid( rag ) ) then return end
 	if ( !IsValid( player ) ) then return end
 	if ( rag:GetClass() != "prop_ragdoll" ) then return end
+	if ( !properties.CanBeTargeted( rag, player ) ) then return end
+	if ( !self:Filter( rag, player ) ) then return end
 
 	local ragpos = rag:GetPos()
 	if not rag:IsInWorld() then
